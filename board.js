@@ -18,6 +18,11 @@ var Board = function() {
 
 };
 
+var testBoard = new Board();
+testBoard.board.forEach(function(item){
+  console.log(item.team + " " + item.word);
+});
+
 Board.RED = 1;
 Board.BLUE = 2;
 var squareTeamList = [];
