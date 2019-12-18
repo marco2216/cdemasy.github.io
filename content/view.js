@@ -3,7 +3,7 @@ const GRID_SIZE = 1000;
 class WordSquare extends React.Component{
     constructor(props){
         super(props);
-        this.state = {selected: false};
+        this.state = { selected: props.selected };
         this.handleClick = this.handleClick.bind(this);
     }
 
@@ -13,6 +13,11 @@ class WordSquare extends React.Component{
             this.props.onPlay();
         }
     }
+
+    componentDidUpdate(prevProps){
+        if(this.state.selected != this.props.selected) this.setState({ selected: this.props.selected })
+    }
+
     render() {
         var style = {
             top: this.props.row * GRID_SIZE,
@@ -30,28 +35,35 @@ class WordSquare extends React.Component{
 
         return (
             <button onClick={this.handleClick} className={classes}
-              style={style}>{this.props.board.getSquare(this.props.row, this.props.col).word}</button>
+              style={style}>{this.props.word}</button>
         );
     }
 }
 
 class BoardView extends React.Component{
     render() {
-        var squares = [];
+        let squares = []
         for (var i = 0; i < this.props.board.size; i++)
-            for (var j = 0; j < this.props.board.size; j++)
-                squares.push(<WordSquare key = {i+""+j}
+            for (var j = 0; j < this.props.board.size; j++) 
+            {
+                let square = this.props.board.getSquare(i, j);
+
+                squares.push(<WordSquare key={i + "" + j}
+                    //select={() => this.props.board.select(i, j)}
                     board={this.props.board}
-                    color={this.props.board.getSquare(i,j).team == Board.BLUE ? "blue"
-                        : this.props.board.getSquare(i,j).team == Board.RED ? "red" : "DarkKhaki"}
                     row={i}
                     col={j}
+                    color={square.team == Board.BLUE ? "blue" : square.team == Board.RED ? "red" : "DarkKhaki"}
+                    selected={square.selected}
+                    word={square.word}
                     onPlay={this.props.onPlay}
                 />);
-        var style = {
+            }
+
+        let style = {
             width: GRID_SIZE,
-            height: GRID_SIZE
         };
+
         return <div style={style} id="board">{squares}</div>
     }
 }
@@ -65,23 +77,51 @@ class ScoreCounter extends React.Component{
 
 }
 
+class ChatBox extends React.Component{
+    render(){
+        return(
+            <div>
+                <ul id="messages"></ul>
+                <form action="">
+                    <input id="m" autoComplete="off" /><button>Send</button>
+                </form>
+            </div>
+        )
+    }
+}
+
 class ContainerView extends React.Component{
   constructor(props){
     super(props);
     this.state = {'board': this.props.board};
+    window.updateBoard = this.onBoardUpdate.bind(this);
   }
 
   onBoardUpdate() {
       this.setState({"board": this.props.board});
+      console.log("board updated");
   }
+  
   render() {
         return (
             <div>
                 <ScoreCounter board={this.state.board} team={Board.RED} color="red" id="scoreCounterRed" />
                 <ScoreCounter board={this.state.board} team={Board.BLUE} color="blue" id="scoreCounterBlue" />
                 <BoardView board={this.state.board}
-                    onPlay={this.onBoardUpdate.bind(this)} />
+                    onPlay={this.onBoardUpdate.bind(this)} />;
             </div>
         )
     }
 }
+
+//INIT
+var board = new Board();
+var containerView = <ContainerView board={board} />;
+ReactDOM.render(
+    containerView,
+    document.getElementById('main')
+);
+ReactDOM.render(
+    <ChatBox></ChatBox>,
+    document.getElementById('chat')
+);

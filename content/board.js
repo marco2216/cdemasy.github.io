@@ -45,6 +45,10 @@ class Board {
     this.board = this.create_board(this.size);
   }
 
+  update_board(from){
+    Object.assign(this, from);
+  }
+
   create_board(size) {
     shuffle(wordList);
     shuffle(squareTeamList);
@@ -64,6 +68,9 @@ class Board {
       sq.selected = true;
       this.score[sq.team]++;
       console.log(this.score);
+
+      socket.emit('board update', this);
+
       return true;
     }
     return false;
