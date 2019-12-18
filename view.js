@@ -1,4 +1,4 @@
-var GRID_SIZE = 1000;
+const GRID_SIZE = 1000;
 
 class WordSquare extends React.Component{
     constructor(props){
@@ -40,7 +40,7 @@ class BoardView extends React.Component{
         var squares = [];
         for (var i = 0; i < this.props.board.size; i++)
             for (var j = 0; j < this.props.board.size; j++)
-                squares.push(<WordSquare
+                squares.push(<WordSquare key = {i+""+j}
                     board={this.props.board}
                     color={this.props.board.getSquare(i,j).team == Board.BLUE ? "blue"
                         : this.props.board.getSquare(i,j).team == Board.RED ? "red" : "DarkKhaki"}
@@ -55,8 +55,6 @@ class BoardView extends React.Component{
         return <div style={style} id="board">{squares}</div>
     }
 }
-
-var board = new Board();
 
 class ScoreCounter extends React.Component{
     render(){
@@ -87,8 +85,3 @@ class ContainerView extends React.Component{
         )
     }
 }
-
-ReactDOM.render(
-    <ContainerView board={board} />,
-    document.getElementById('main')
-);
