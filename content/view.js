@@ -82,7 +82,7 @@ class ChatBox extends React.Component{
         return(
             <div>
                 <ul id="messages"></ul>
-                <form action="">
+                <form id="chatForm" action="">
                     <input id="m" autoComplete="off" /><button>Send</button>
                 </form>
             </div>
@@ -99,7 +99,6 @@ class ContainerView extends React.Component{
 
   onBoardUpdate() {
       this.setState({"board": this.props.board});
-      console.log("board updated");
   }
   
   render() {
@@ -114,14 +113,27 @@ class ContainerView extends React.Component{
     }
 }
 
+class LobbyView extends React.Component{
+    render(){
+        return (
+            <form id="groupForm" action="">
+                <input id="groupString" autoComplete="off" /><button>JOIN</button>
+            </form>
+        )
+    }
+}
+
 //INIT
 var board = new Board();
-var containerView = <ContainerView board={board} />;
 ReactDOM.render(
-    containerView,
+    <ContainerView board={board} />,
     document.getElementById('main')
 );
 ReactDOM.render(
     <ChatBox></ChatBox>,
     document.getElementById('chat')
+);
+ReactDOM.render(
+    <LobbyView></LobbyView>,
+    document.getElementById('lobby')
 );

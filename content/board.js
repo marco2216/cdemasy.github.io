@@ -67,7 +67,7 @@ class Board {
     if (!sq.selected) {
       sq.selected = true;
       this.score[sq.team]++;
-      console.log(this.score);
+      //console.log(this.score);
 
       socket.emit('board update', this);
 
@@ -86,7 +86,7 @@ Board.BLUE = 2;
 
 
 
-
+/*
 //
 //
 //MAIN
@@ -105,7 +105,7 @@ testBoard.board.forEach(function(arr, index1){
     console.log("Square " + index1+index2 + ": " + square.word + " " + square.team);
   })
 });
-
+*/
 
 
 

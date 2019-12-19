@@ -9,21 +9,28 @@ var io = require('socket.io').listen(server);
 var htmlPath = path.join(__dirname, 'content');
 app.use(express.static(htmlPath));
 
+var boards = {};
+
 io.on('connection', function (socket) {
     console.log('a user connected');
 
-    socket.on('chat message', function (msg) {
-        console.log('message: ' + msg);
-        io.emit('chat message', msg);
-    });
+    socket.on('group', function (groupName) {
+        if(boards[groupName]) return;
 
-    socket.on('board update', function (msg) {
-        console.log('message: ' + msg);
-        io.emit('board update', msg);
-    });
+        const nsp = io.of('/'+groupName);
+        nsp.on('connection', function(socket){
+            if(boards[groupName]) nsp.emit('board update', boards[groupName]);
 
-    socket.on('disconnect', function () {
-        console.log('user disconnected');
+            socket.on('chat message', function (msg) {
+                console.log("chat "+msg);
+                nsp.emit('chat message', msg);
+            });
+
+            socket.on('board update', function (board) {
+                boards[groupName] = board;
+                nsp.emit('board update', board);
+            });
+        });
     });
 });
 
