@@ -116,8 +116,9 @@ class ContainerView extends React.Component{
 class LobbyView extends React.Component{
     render(){
         return (
-            <form id="groupForm" action="">
-                <input id="groupString" autoComplete="off" /><button>JOIN</button>
+            <form id="groupForm" action="" class="center">
+                <input id="userName" autoComplete="off" placeholder="name"/>
+                <input id="groupString" autoComplete="off" placeholder="group"/><button>JOIN</button>
             </form>
         )
     }

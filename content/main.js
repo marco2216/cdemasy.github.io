@@ -1,5 +1,5 @@
 var socket = io();
-var room;
+var name;
 
 $(document).ready(function () {
 
@@ -8,7 +8,7 @@ $('#chatForm').submit(function (e) {
     let msg = $('#m').val();
     if (msg == "") return;
 
-    socket.emit('chat message', msg);
+    socket.emit('chat message', `${name}: ${msg}`);
     $('#m').val('');
     return false;
 });
@@ -16,7 +16,8 @@ $('#chatForm').submit(function (e) {
 $('#groupForm').submit(function (e) {
     e.preventDefault(); // prevents page reloading
     let group = $('#groupString').val();
-    if (group == "") return;
+    name = $('#userName').val();
+    if (group == "" || name == "") return;
 
     io().emit('group', group);
     socket.removeAllListeners();
