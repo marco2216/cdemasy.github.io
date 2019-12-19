@@ -10,12 +10,14 @@ var htmlPath = path.join(__dirname, 'content');
 app.use(express.static(htmlPath));
 
 var boards = {};
+var groups = {};
 
 io.on('connection', function (socket) {
     console.log('a user connected');
 
     socket.on('group', function (groupName) {
-        if(boards[groupName]) return;
+        if(groups[groupName]) return;
+        groups[groupName] = true;
 
         const nsp = io.of('/'+groupName);
         nsp.on('connection', function(socket){
@@ -29,8 +31,10 @@ io.on('connection', function (socket) {
             socket.on('board update', function (board) {
                 boards[groupName] = board;
                 nsp.emit('board update', board);
+                console.log('emitted board update');
             });
         });
+        console.log('established group ' + groupName);
     });
 });
 

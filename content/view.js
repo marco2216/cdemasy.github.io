@@ -107,7 +107,7 @@ class ContainerView extends React.Component{
                 <ScoreCounter board={this.state.board} team={Board.RED} color="red" id="scoreCounterRed" />
                 <ScoreCounter board={this.state.board} team={Board.BLUE} color="blue" id="scoreCounterBlue" />
                 <BoardView board={this.state.board}
-                    onPlay={this.onBoardUpdate.bind(this)} />;
+                    onPlay={this.onBoardUpdate.bind(this)} />
             </div>
         )
     }

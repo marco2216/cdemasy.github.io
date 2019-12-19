@@ -67,8 +67,7 @@ class Board {
     if (!sq.selected) {
       sq.selected = true;
       this.score[sq.team]++;
-      //console.log(this.score);
-
+      
       socket.emit('board update', this);
 
       return true;
