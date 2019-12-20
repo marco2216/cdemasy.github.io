@@ -63,12 +63,12 @@ function setupUserSocket(nsp, socket, userName, game, board) {
     });
 
     socket.on('select square', function (uID, row, column) {
-        if (game.makePlayGuesser(player, row, column)) nsp.emit('board update', board);
+        if (game.makePlayGuesser(game.players[socket.id], row, column)) nsp.emit('board update', board);
         else socket.emit('board update', board);
     });
 
     socket.on('master', function (uID, numSquares, hint) {
-        if (game.makePlayMaster(player, numSquares, hint)) nsp.emit('master update', numSquares, hint);
+        if (game.makePlayMaster(game.players[socket.id], numSquares, hint)) nsp.emit('master update', numSquares, hint);
     });
 
     socket.on('disconnect', () => {
