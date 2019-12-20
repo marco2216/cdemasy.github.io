@@ -1,4 +1,6 @@
-var wordList = [];
+var fs = require("fs");
+var wordList = fs.readFileSync("content/words.txt").toString().split(/\r?\n/);
+
 var squareTeamList = [];
 
 class Square {
@@ -11,14 +13,6 @@ class Square {
 
 class Board {
   constructor() {
-    $.ajax({
-      url: "words.txt",
-      async: false,
-      success: function (data) {
-        wordList = data.split(/\r?\n/);
-      },
-      dataType: "text"
-    });
     squareTeamList = [];
 
     for (var i = 0; i < 10; i++) 
@@ -67,16 +61,10 @@ class Board {
     if (!sq.selected) {
       sq.selected = true;
       this.score[sq.team]++;
-
-      socket.emit('select square', userID, i, j);
-
+      
       return true;
     }
     return false;
-  }
-
-  selectAll(){
-    this.board.forEach(a => a.forEach(s => s.selected = true));
   }
 
   getSquare(i, j) {
@@ -86,6 +74,8 @@ class Board {
 
 Board.RED = 1;
 Board.BLUE = 2;
+
+module.exports = Board;
 
 /*
 //

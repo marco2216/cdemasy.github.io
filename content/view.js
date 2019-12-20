@@ -22,19 +22,15 @@ class WordSquare extends React.Component{
         var style = {
             top: this.props.row * GRID_SIZE,
             left: this.props.col * GRID_SIZE,
-            fontSize: 25,
+            fontSize: "2vw",
             padding: 5,
-            height: 100,
-            width: 200,
+            height: "7vw",
+            width: "16vw",
             color: this.state.selected ? this.props.color : null
         };
 
-        var classes = "wordsquare";
-        if (this.props.color != Board.EMPTY)
-            classes += this.props.color;
-
         return (
-            <button onClick={this.handleClick} className={classes}
+            <button onClick={this.handleClick} className={"wordsquare"} disabled={this.state.selected ? true : false}
               style={style}>{this.props.word}</button>
         );
     }
@@ -61,7 +57,7 @@ class BoardView extends React.Component{
             }
 
         let style = {
-            width: GRID_SIZE,
+            width: "80vw",
         };
 
         return <div style={style} id="board">{squares}</div>
@@ -77,13 +73,26 @@ class ScoreCounter extends React.Component{
 
 }
 
+class TeamRoleSelect extends React.Component{
+    render(){
+        return (
+            <div>
+                <button id="redmaster">RED MASTER</button>
+                <button id="redguesser">RED GUESSER</button>
+                <button id="bluemaster">BLUE MASTER</button>
+                <button id="blueguesser">BLUE GUESSER</button>
+            </div>
+        )
+    }
+}
+
 class ChatBox extends React.Component{
     render(){
         return(
             <div>
                 <ul id="messages"></ul>
                 <form id="chatForm" action="">
-                    <input id="m" autoComplete="off" /><button>Send</button>
+                    <input id="m" autoComplete="off" />
                 </form>
             </div>
         )
@@ -106,8 +115,16 @@ class ContainerView extends React.Component{
             <div>
                 <ScoreCounter board={this.state.board} team={Board.RED} color="red" id="scoreCounterRed" />
                 <ScoreCounter board={this.state.board} team={Board.BLUE} color="blue" id="scoreCounterBlue" />
+                <div id="turn"/>
+                <TeamRoleSelect></TeamRoleSelect>
                 <BoardView board={this.state.board}
                     onPlay={this.onBoardUpdate.bind(this)} />
+                <form id="masterForm" action="">
+                    <input id="hint" type="text" placeholder="hint"></input>
+                    <input id="numSquares" type="number" min="1" max="5" placeholder="n"></input>
+                    <button>send</button>
+                </form>
+                <div id="masterBoardContainer"></div>
             </div>
         )
     }
@@ -116,9 +133,10 @@ class ContainerView extends React.Component{
 class LobbyView extends React.Component{
     render(){
         return (
-            <form id="groupForm" action="" class="center">
-                <input id="userName" autoComplete="off" placeholder="name"/>
-                <input id="groupString" autoComplete="off" placeholder="group"/><button>JOIN</button>
+            <form id="groupForm" action="" className="center">
+                <input id="userName" autoComplete="off" placeholder="name" defaultValue="user" />
+                <input id="groupString" autoComplete="off" placeholder="group" defaultValue="group" />
+                <button>JOIN</button>
             </form>
         )
     }
