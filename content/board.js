@@ -32,16 +32,11 @@ class Board {
       squareTeamList.push(0);
     }
     console.log(squareTeamList);
-    
-    var p1, p2 = { team: Board.RED };
-    var p3, p4 = { team: Board.BLUE };
+
     this.score = [];
     this.score[Board.RED] = 0;
     this.score[Board.BLUE] = 0;
     this.size = 5;
-    this.players = ["p1", "p2", "p3", "p4"];
-    this.current_player = this.players[0];
-    this.current_team = "red";
     this.board = this.create_board(this.size);
   }
 

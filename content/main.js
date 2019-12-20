@@ -25,7 +25,7 @@ $('#groupForm').submit(function (e) {
     name = $('#userName').val();
     if (group == "" || name == "") return;
 
-    io().emit('group', group);
+    io().emit('group', group, name);
     socket.removeAllListeners();
     
     setTimeout(function(){
@@ -50,6 +50,13 @@ $('#groupForm').submit(function (e) {
 
         socket.on('chat message', function (msg) {
             $('#messages').append($('<li>').text(msg));
+        });
+
+        socket.on('players', function(players){
+            console.log(players);
+            playersList.length = 0;
+            playersList.push(...players);
+            window.updatePlayers();
         });
 
         socket.on('board update', function (msg) {

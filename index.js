@@ -20,7 +20,7 @@ io.on('connection', function (socket) {
     const userID = userCounter++;
     socket.emit("userID", userID);
 
-    socket.on('group', function (groupName) {
+    socket.on('group', function (groupName, userName) {
 
         if (existsGroup(groupName)) {
             return;
@@ -33,60 +33,47 @@ io.on('connection', function (socket) {
             nsp.emit('turn', team, role);
         });
 
-        var board = new Board();
-
-        nsp.on('connection', socket => setupUserSocket(nsp, socket, game, board));
+        nsp.on('connection', socket => setupUserSocket(nsp, socket, userName, game, game.board));
 
         console.log('established group: ' + groupName);
     });
 });
 
-function setupUserSocket(nsp, socket, game, board) {
+function setupUserSocket(nsp, socket, userName, game, board) {
+    socket.emit('players', Object.values(game.players));
     socket.emit('board update', board);
     socket.emit('turn', game.team(), game.role());
 
-    let player;
+    let uname = userName;
+    if (Object.values(game.players).find(p => p.username == userName)) uname = uname+socket.id;
+    game.players[socket.id] = new Player(-1, uname, RED, MASTER);
 
     socket.on('chat message', function (msg) {
-        //console.log("chat " + msg);
         nsp.emit('chat message', msg);
     });
 
     socket.on('team role', function (uID, team, role) {
-        player = new Player(uID, team, role);
-        game.players[uID] = player; //don't use?
+        let player = game.players[socket.id];
+        player.team = team;
+        player.role = role;
 
+
+        nsp.emit('players', Object.values(game.players));
         socket.emit('master board', role == MASTER ? board : null);
     });
 
     socket.on('select square', function (uID, row, column) {
-        if (!game.pTurn(player) || player.role != GUESSER) {
-            console.log("received play from invalid user");
-            socket.emit('board update', board);
-        }
-        else if (board.select(row, column)) {
-            let square = board.getSquare(row, column);
-            let color = square.team == Board.BLUE ? "blue" : square.team == Board.RED ? "red" : "yellow"
-
-            game.makePlayGuesser(uID);
-            nsp.emit('board update', board);
-            //console.log('emitted board update');
-            //console.log(color + " " +player);
-
-            if(color != player.team){
-                game.endTurn();
-            }
-        }
+        if (game.makePlayGuesser(player, row, column)) nsp.emit('board update', board);
+        else socket.emit('board update', board);
     });
 
     socket.on('master', function (uID, numSquares, hint) {
-        if (!game.pTurn(player) || player.role != MASTER) {
-            return;
-        }
-        else {
-            game.makePlayMaster(uID, numSquares, hint);
-            nsp.emit('master update', numSquares, hint);
-        }
+        if (game.makePlayMaster(player, numSquares, hint)) nsp.emit('master update', numSquares, hint);
+    });
+
+    socket.on('disconnect', () => {
+        delete game.players[socket.id];
+        nsp.emit('players', Object.values(game.players));
     });
 
 
@@ -116,23 +103,37 @@ class Game {
         this.turnID = 0;
         this.players = players ? players : {};
         this.onNewTurn = onNewTurn;
+        this.board = new Board();
     }
 
-    makePlayMaster(uID, numSquares, hint) {
-        //if(!this.isPlayerTurn(uID)) return false;
-
-        this.numSquares = numSquares;
-        this.hint = hint;
-        this.endTurn();
-        return true;
+    makePlayMaster(player, numSquares, hint) {
+        if (!this.pTurn(player) || player.role != MASTER) {
+            return false;
+        }
+        else {
+            this.numSquares = numSquares;
+            this.hint = hint;
+            this.endTurn();
+            return true;
+        }
     }
 
-    makePlayGuesser(uID) {
-        //if (!this.isPlayerTurn(uID)) return false;
-        this.numSquares--;
-        console.log(this.numSquares);
-        if (this.numSquares == 0) this.endTurn();
-        return true;
+    makePlayGuesser(player, row, column) {
+        if (!this.pTurn(player) || player.role != GUESSER) {
+            console.log("received play from invalid user");
+            return false;
+        }
+        else if (this.board.select(row, column)) {
+            let square = this.board.getSquare(row, column);
+            let color = square.team == Board.BLUE ? "blue" : square.team == Board.RED ? "red" : "yellow"
+
+            this.numSquares--;
+
+            if (color != player.team || this.numSquares == 0) {
+                this.endTurn();
+            }
+            return true;
+        }
     }
 
     endTurn() {
@@ -159,8 +160,9 @@ class Game {
 }
 
 class Player {
-    constructor(userID, team, role) {
+    constructor(userID, username, team, role) {
         this.userID = userID;
+        this.username = username;
         this.team = team;
         this.role = role;
     }

@@ -99,6 +99,34 @@ class ChatBox extends React.Component{
     }
 }
 
+class PlayersView extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = { players: props.players };
+        window.updatePlayers = this.onPlayersUpdate.bind(this);
+    }
+
+    onPlayersUpdate(){
+        this.setState({ players: this.props.players });
+    }
+
+    render(){
+        let playersRed = [];
+        let playersBlue = [];
+        this.state.players.forEach(p => {
+            let arr = p.team == "red" ? playersRed : playersBlue;
+            arr.push(<li key={p.username}>{`${p.username}: ${p.role}`}</li>)
+        });
+
+        return(
+            <div>
+                <ul id="playersRed" style={{color: "red"}}>{playersRed}</ul>
+                <ul id="playersBlue" style={{ color: "blue" }}>{playersBlue}</ul>
+            </div>
+        );
+    }
+}
+
 class ContainerView extends React.Component{
   constructor(props){
     super(props);
@@ -143,10 +171,15 @@ class LobbyView extends React.Component{
 }
 
 //INIT
+var playersList = [];
 var board = new Board();
 ReactDOM.render(
     <ContainerView board={board} />,
     document.getElementById('main')
+);
+ReactDOM.render(
+    <PlayersView players={playersList}></PlayersView>,
+    document.getElementById('players')
 );
 ReactDOM.render(
     <ChatBox></ChatBox>,
