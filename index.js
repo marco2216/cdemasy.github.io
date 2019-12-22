@@ -30,26 +30,36 @@ io.on('connection', function (socket) {
         const nsp = io.of('/' + groupName);
 
         var game = new Game(null, function (turnID, team, role) {
-            nsp.emit('turn', team, role);
+            nsp.emit('turn', turnID, team, role);
+            if (role == MASTER) nsp.emit('master update', 0, "");
         });
 
-        nsp.on('connection', socket => setupUserSocket(nsp, socket, userName, game, game.board));
+        let userTicker = 0;
+        nsp.on('connection', socket => onUserJoinsGroup(nsp, socket, userTicker, game, game.board));
 
         console.log('established group: ' + groupName);
     });
 });
 
-function setupUserSocket(nsp, socket, userName, game, board) {
+function onUserJoinsGroup(nsp, socket, userTicker, game, board) {
+    userTicker++;
+    let uname;
+    socket.on('username', name => {
+        uname = name;
+        if (Object.values(game.players).find(p => p.username == uname)) uname = uname + userTicker;
+        game.players[socket.id] = new Player(-1, uname, RED, MASTER);
+
+        //console.log(`${userName} ${uname}`);
+    }); 
+
     socket.emit('players', Object.values(game.players));
     socket.emit('board update', board);
-    socket.emit('turn', game.team(), game.role());
+    socket.emit('turn', game.turnID, game.team(), game.role());
+    socket.emit('master update', game.numSquares, game.hint);
 
-    let uname = userName;
-    if (Object.values(game.players).find(p => p.username == userName)) uname = uname+socket.id;
-    game.players[socket.id] = new Player(-1, uname, RED, MASTER);
 
     socket.on('chat message', function (msg) {
-        nsp.emit('chat message', msg);
+        nsp.emit('chat message', `${uname}: ${msg}`);
     });
 
     socket.on('team role', function (uID, team, role) {
@@ -58,17 +68,23 @@ function setupUserSocket(nsp, socket, userName, game, board) {
         player.role = role;
 
 
+        socket.emit('team role', player.turnID(), team, role);
+        socket.emit('turn', game.turnID, game.team(), game.role());
         nsp.emit('players', Object.values(game.players));
         socket.emit('master board', role == MASTER ? board : null);
     });
 
     socket.on('select square', function (uID, row, column) {
-        if (game.makePlayGuesser(game.players[socket.id], row, column)) nsp.emit('board update', board);
+        if (game.makePlayGuesser(game.players[socket.id], row, column)) {
+            nsp.emit('board update', board);
+            nsp.emit('master update', game.numSquares, game.hint);
+        }
         else socket.emit('board update', board);
     });
 
     socket.on('master', function (uID, numSquares, hint) {
-        if (game.makePlayMaster(game.players[socket.id], numSquares, hint)) nsp.emit('master update', numSquares, hint);
+        if (game.makePlayMaster(game.players[socket.id], numSquares, hint)) 
+            nsp.emit('master update', numSquares, hint);
     });
 
     socket.on('disconnect', () => {
@@ -104,6 +120,8 @@ class Game {
         this.players = players ? players : {};
         this.onNewTurn = onNewTurn;
         this.board = new Board();
+        this.numSquares = 0;
+        this.hint = "";
     }
 
     makePlayMaster(player, numSquares, hint) {

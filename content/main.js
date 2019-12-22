@@ -14,7 +14,7 @@ $('#chatForm').submit(function (e) {
     let msg = $('#m').val();
     if (msg == "") return;
 
-    socket.emit('chat message', `${name}: ${msg}`);
+    socket.emit('chat message', msg);
     $('#m').val('');
     return false;
 });
@@ -25,11 +25,18 @@ $('#groupForm').submit(function (e) {
     name = $('#userName').val();
     if (group == "" || name == "") return;
 
+    console.log("joining g: " + group + "n: "+name);
+
     io().emit('group', group, name);
     socket.removeAllListeners();
+
+    var _turnID;
+    var _role;
     
     setTimeout(function(){
         socket = io('/'+group);
+
+        socket.emit('username', name);
 
         //socket.emit('team role', userID, 'red', 'master');
         assignTeamRoleListener(socket, "#redmaster", "red", "master");
@@ -57,6 +64,13 @@ $('#groupForm').submit(function (e) {
             playersList.length = 0;
             playersList.push(...players);
             window.updatePlayers();
+        });
+
+        socket.on('team role', function(turnID, team, role){
+            _turnID = turnID;
+            _role = role;
+
+            $("#masterForm :input").prop('disabled', role != "master");
         });
 
         socket.on('board update', function (msg) {
@@ -91,7 +105,10 @@ $('#groupForm').submit(function (e) {
             $("#numSquares").val(numSquares);
         });
 
-        socket.on('turn', function (team, role) {
+        socket.on('turn', function (turnID, team, role) {
+            setBoardEnabled(_turnID == turnID && _role == "guesser");
+            setMasterFormenabled(_turnID == turnID && _role == "master");
+
             $("#turn").html(team + " " + role);
             $("#turn").css("color", team);
         });
@@ -111,3 +128,6 @@ function assignTeamRoleListener(socket, buttonID, team, role){
         console.log("sent team role " + team + role);
     });
 }
+
+var setBoardEnabled = bool => $("#board :input").prop('disabled', !bool);
+var setMasterFormenabled = bool => $("#masterForm :input").prop('disabled', !bool);
