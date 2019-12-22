@@ -41,7 +41,6 @@ io.on('connection', function (socket) {
 });
 
 function onUserJoinsGroup(nsp, socket, game, board) {
-    userTicker++;
     let uname;
     socket.on('username', name => {
         uname = name;
