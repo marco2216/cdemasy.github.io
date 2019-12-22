@@ -34,22 +34,19 @@ io.on('connection', function (socket) {
             if (role == MASTER) nsp.emit('master update', 0, "");
         });
 
-        let userTicker = 0;
-        nsp.on('connection', socket => onUserJoinsGroup(nsp, socket, userTicker, game, game.board));
+        nsp.on('connection', socket => onUserJoinsGroup(nsp, socket, game, game.board));
 
         console.log('established group: ' + groupName);
     });
 });
 
-function onUserJoinsGroup(nsp, socket, userTicker, game, board) {
+function onUserJoinsGroup(nsp, socket, game, board) {
     userTicker++;
     let uname;
     socket.on('username', name => {
         uname = name;
-        if (Object.values(game.players).find(p => p.username == uname)) uname = uname + userTicker;
+        if (Object.values(game.players).find(p => p.username == uname)) uname = uname + userCounter;
         game.players[socket.id] = new Player(-1, uname, RED, MASTER);
-
-        //console.log(`${userName} ${uname}`);
     }); 
 
     socket.emit('players', Object.values(game.players));
