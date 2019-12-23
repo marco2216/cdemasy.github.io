@@ -22,10 +22,10 @@ class WordSquare extends React.Component{
         var style = {
             top: this.props.row * GRID_SIZE,
             left: this.props.col * GRID_SIZE,
-            fontSize: "2vw",
+            fontSize: "1.5vw",
             padding: 5,
-            height: "7vw",
-            width: "16vw",
+            height: "5.25vw",
+            width: "12vw",
             color: this.state.selected ? this.props.color : null
         };
 
@@ -57,7 +57,7 @@ class BoardView extends React.Component{
             }
 
         let style = {
-            width: "80vw",
+            width: "60vw",
         };
 
         return <div style={style} id="board">{squares}</div>
@@ -76,10 +76,10 @@ class ScoreCounter extends React.Component{
 class TeamRoleSelect extends React.Component{
     render(){
         return (
-            <div>
-                <button id="redmaster">RED MASTER</button>
+            <div id="teamRole">
+                <button id="redmaster">RED SPYMASTER</button>
                 <button id="redguesser">RED GUESSER</button>
-                <button id="bluemaster">BLUE MASTER</button>
+                <button id="bluemaster">BLUE SPYMASTER</button>
                 <button id="blueguesser">BLUE GUESSER</button>
             </div>
         )
@@ -144,7 +144,7 @@ class ContainerView extends React.Component{
                 <ScoreCounter board={this.state.board} team={Board.RED} color="red" id="scoreCounterRed" />
                 <ScoreCounter board={this.state.board} team={Board.BLUE} color="blue" id="scoreCounterBlue" />
                 <div id="turn"/>
-                <TeamRoleSelect></TeamRoleSelect>
+                <TeamRoleSelect id="teamRole"></TeamRoleSelect>
                 <BoardView board={this.state.board}
                     onPlay={this.onBoardUpdate.bind(this)} />
                 <form id="masterForm" action="">
@@ -162,8 +162,8 @@ class LobbyView extends React.Component{
     render(){
         return (
             <form id="groupForm" action="" className="center">
-                <input id="userName" autoComplete="off" placeholder="name" defaultValue="user" />
-                <input id="groupString" autoComplete="off" placeholder="group" defaultValue="group" />
+                <input id="userName" autoComplete="off" placeholder="name" />
+                <input id="groupString" autoComplete="off" placeholder="group" />
                 <button>JOIN</button>
             </form>
         )

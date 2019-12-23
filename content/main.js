@@ -7,7 +7,8 @@ socket.on("userID", id => {
     console.log("userID is "+userID);
 });
 
-const turnNames = 
+const teamString = {"red":"RED", "blue":"BLUE"};
+const roleString = {"guesser":"GUESSER", "master":"SPYMASTER"}
 
 $('#chatForm').submit(function (e) {
     e.preventDefault(); // prevents page reloading
@@ -109,7 +110,7 @@ $('#groupForm').submit(function (e) {
             setBoardEnabled(_turnID == turnID && _role == "guesser");
             setMasterFormenabled(_turnID == turnID && _role == "master");
 
-            $("#turn").html(team + " " + role);
+            $("#turn").html(teamString[team] + " " + roleString[role]);
             $("#turn").css("color", team);
         });
 
@@ -124,7 +125,8 @@ $('#groupForm').submit(function (e) {
 
 function assignTeamRoleListener(socket, buttonID, team, role){
     $(buttonID).click(() => {
-        socket.emit('team role', userID, team, role) 
+        $("#teamRole").css("display", "none");
+        socket.emit('team role', userID, team, role);
         console.log("sent team role " + team + role);
     });
 }
