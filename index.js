@@ -41,7 +41,7 @@ io.on('connection', function (socket) {
 });
 
 function onUserJoinsGroup(nsp, socket, game, board) {
-    let uname;
+    let uname, player;
     socket.on('username', name => {
         uname = name;
         if (Object.values(game.players).find(p => p.username == uname)) uname = uname + userCounter;
@@ -59,7 +59,7 @@ function onUserJoinsGroup(nsp, socket, game, board) {
     });
 
     socket.on('team role', function (uID, team, role) {
-        let player = game.players[socket.id];
+        player = game.players[socket.id];
         player.team = team;
         player.role = role;
 
@@ -83,13 +83,20 @@ function onUserJoinsGroup(nsp, socket, game, board) {
             nsp.emit('master update', numSquares, hint);
     });
 
+
     socket.on('disconnect', () => {
+        console.log(uname + " disconnected");
         delete game.players[socket.id];
         nsp.emit('players', Object.values(game.players));
     });
 
-
-
+    socket.on('connect', () => {
+        console.log("reconnect");
+        if (player) {
+            game.players[socket.id] = player;
+            nsp.emit('players', Object.values(game.players));
+        }
+    })
 };
 
 server.listen(3000, function () {

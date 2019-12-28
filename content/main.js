@@ -31,8 +31,7 @@ $('#groupForm').submit(function (e) {
     io().emit('group', group, name);
     socket.removeAllListeners();
 
-    var _turnID;
-    var _role;
+    var _role, _team, _turnID;
     
     setTimeout(function(){
         socket = io('/'+group);
@@ -56,6 +55,11 @@ $('#groupForm').submit(function (e) {
             }
         });
 
+        socket.on('reconnect', function(attemptNumber){
+            socket.emit('username', name);
+            socket.emit('team role', userID, _team, _role);
+        });
+
         socket.on('chat message', function (msg) {
             $('#messages').append($('<li>').text(msg));
         });
@@ -70,6 +74,7 @@ $('#groupForm').submit(function (e) {
         socket.on('team role', function(turnID, team, role){
             _turnID = turnID;
             _role = role;
+            _team = team;
 
             $("#masterForm :input").prop('disabled', role != "master");
         });
